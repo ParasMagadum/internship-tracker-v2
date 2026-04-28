@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const Report = require('../models/Report');
+const User = require('../models/User');  // ← add this line
 const { protect, mentorOnly } = require('../middleware/auth');
 
 // Student: Submit daily report
@@ -68,8 +69,13 @@ router.get('/my/:date', protect, async (req, res) => {
 // Mentor: Get all reports (optionally filter by student)
 router.get('/all', protect, mentorOnly, async (req, res) => {
   try {
-    const filter = {};
+    // Only get students who registered with this mentor's email
+    const students = await User.find({ mentorEmail: req.user.email }).select('_id');
+    const studentIds = students.map(s => s._id);
+
+    const filter = { student: { $in: studentIds } };
     if (req.query.studentId) filter.student = req.query.studentId;
+
     const reports = await Report.find(filter)
       .populate('student', 'name email rollNumber college internshipTitle')
       .populate('reviewedBy', 'name')

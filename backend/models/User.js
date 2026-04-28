@@ -13,7 +13,9 @@ const userSchema = new mongoose.Schema({
   // Mentor-specific
   organization: { type: String },
   designation: { type: String },
-  assignedStudents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }]
+  assignedStudents: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
+  // Student-mentor link
+  mentorEmail: { type: String, lowercase: true }
 }, { timestamps: true });
 
 userSchema.pre('save', async function (next) {
