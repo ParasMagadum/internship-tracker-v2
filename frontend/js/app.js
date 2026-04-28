@@ -2,7 +2,7 @@
    InternLog — Frontend JS
    ═══════════════════════════════════════════ */
 
-const API = 'http://localhost:5000/api';
+const API = 'https://internship-tracker-v2.onrender.com/api';
 let currentRole = 'student';
 let currentRating = 0;
 let allReports = [];
