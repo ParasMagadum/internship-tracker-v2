@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>InternLog — Daily Report Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- ═══ AUTH SCREEN ═══ -->
+<div id="auth-screen" class="screen active">
+  <div class="auth-bg">
+    <div class="bg-orb orb1"></div>
+    <div class="bg-orb orb2"></div>
+    <div class="bg-orb orb3"></div>
+  </div>
+  <div class="auth-container">
+    <div class="auth-brand">
+      <div class="brand-icon">IL</div>
+      <h1>InternLog</h1>
+      <p>Daily Internship Report System</p>
+    </div>
+
+    <div class="role-toggle">
+      <button class="role-btn active" data-role="student" onclick="setRole('student',this)">
+        <span class="role-icon">🎓</span> Student
+      </button>
+      <button class="role-btn" data-role="mentor" onclick="setRole('mentor',this)">
+        <span class="role-icon">👨‍💼</span> Mentor
+      </button>
+    </div>
+
+    <div class="auth-tabs">
+      <button class="tab-btn active" onclick="switchTab('login',this)">Login</button>
+      <button class="tab-btn" onclick="switchTab('register',this)">Register</button>
+    </div>
+
+    <form id="login-form" class="auth-form" onsubmit="handleLogin(event)">
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="login-email" placeholder="you@example.com" required/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="••••••••" required/>
+      </div>
+      <div id="login-error" class="error-msg"></div>
+      <button type="submit" class="btn-primary" id="login-btn">
+        <span>Sign In</span>
+        <div class="btn-loader hidden"></div>
+      </button>
+    </form>
+
+    <form id="register-form" class="auth-form hidden" onsubmit="handleRegister(event)">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="reg-name" placeholder="John Doe" required/>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="reg-email" placeholder="you@example.com" required/>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="reg-password" placeholder="Minimum 6 characters" required minlength="6"/>
+      </div>
+      <div id="student-fields">
+        <div class="form-group">
+          <label>Roll Number</label>
+          <input type="text" id="reg-roll" placeholder="e.g. CS2021001"/>
+        </div>
+        <div class="form-group">
+          <label>College / University</label>
+          <input type="text" id="reg-college" placeholder="MIT, IIT Bombay..."/>
+        </div>
+        <div class="form-group">
+          <label>Internship Title</label>
+          <input type="text" id="reg-internship" placeholder="Full Stack Developer Intern"/>
+        </div>
+      </div>
+      <div id="mentor-fields" class="hidden">
+        <div class="form-group">
+          <label>Organization</label>
+          <input type="text" id="reg-org" placeholder="Company / Institution name"/>
+        </div>
+        <div class="form-group">
+          <label>Designation</label>
+          <input type="text" id="reg-designation" placeholder="e.g. Senior Engineer, Professor"/>
+        </div>
+      </div>
+      <div id="register-error" class="error-msg"></div>
+      <button type="submit" class="btn-primary" id="register-btn">
+        <span>Create Account</span>
+        <div class="btn-loader hidden"></div>
+      </button>
+    </form>
+  </div>
+</div>
+
+<!-- ═══ STUDENT DASHBOARD ═══ -->
+<div id="student-screen" class="screen">
+  <nav class="navbar">
+    <div class="nav-brand">
+      <div class="brand-icon small">IL</div>
+      <span>InternLog</span>
+    </div>
+    <div class="nav-center">
+      <button class="nav-btn active" onclick="showStudentTab('dashboard',this)">Dashboard</button>
+      <button class="nav-btn" onclick="showStudentTab('submit',this)">Submit Report</button>
+      <button class="nav-btn" onclick="showStudentTab('history',this)">My Reports</button>
+    </div>
+    <div class="nav-right">
+      <span id="student-name-nav" class="nav-user"></span>
+      <button class="btn-export" onclick="exportExcel()">⬇ Export All</button>
+      <button class="btn-edit-profile" onclick="openEditProfile()">✏️ Profile</button>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- Dashboard Tab -->
+  <div id="tab-dashboard" class="tab-content active">
+    <div class="page-header">
+      <h2>Good <span id="time-greeting"></span>, <span id="student-greeting"></span> 👋</h2>
+      <p class="sub">Track your internship progress daily</p>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📋</div>
+        <div class="stat-info">
+          <span id="stat-total" class="stat-num">0</span>
+          <span class="stat-label">Total Reports</span>
+        </div>
+      </div>
+      <div class="stat-card accent">
+        <div class="stat-icon">✅</div>
+        <div class="stat-info">
+          <span id="stat-reviewed" class="stat-num">0</span>
+          <span class="stat-label">Reviewed</span>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">📅</div>
+        <div class="stat-info">
+          <span id="stat-month" class="stat-num">0</span>
+          <span class="stat-label">This Month</span>
+        </div>
+      </div>
+      <div class="stat-card warm">
+        <div class="stat-icon">⏳</div>
+        <div class="stat-info">
+          <span id="stat-pending" class="stat-num">0</span>
+          <span class="stat-label">Awaiting Review</span>
+        </div>
+      </div>
+    </div>
+    <div class="quick-submit-banner">
+      <div>
+        <h3>📝 Ready to log today?</h3>
+        <p>Date: <strong id="today-date-display"></strong></p>
+      </div>
+      <button class="btn-primary" onclick="showStudentTab('submit', document.querySelector('.nav-btn:nth-child(2)'))">
+        Submit Today's Report →
+      </button>
+    </div>
+    <div class="recent-section">
+      <h3>Recent Reports</h3>
+      <div id="recent-reports-list" class="report-cards"></div>
+    </div>
+  </div>
+
+  <!-- Submit Report Tab -->
+  <div id="tab-submit" class="tab-content">
+    <div class="page-header">
+      <h2>Submit Daily Report</h2>
+      <p class="sub">Document your work for today</p>
+    </div>
+    <form class="report-form" onsubmit="submitReport(event)">
+      <div class="form-section">
+        <label>📅 Report Date</label>
+        <input type="date" id="report-date" required/>
+      </div>
+      <div class="form-section">
+        <label>⏱ Hours Worked</label>
+        <input type="number" id="report-hours" min="0" max="24" step="0.5" placeholder="e.g. 8" required/>
+      </div>
+      <div class="form-section">
+        <div class="tasks-header">
+          <label>✅ Tasks Completed</label>
+          <button type="button" class="btn-add-task" onclick="addTask()">+ Add Task</button>
+        </div>
+        <div id="tasks-container">
+          <div class="task-item" data-index="0">
+            <div class="task-num">1</div>
+            <div class="task-fields">
+              <input type="text" placeholder="Task title" class="task-title" required/>
+              <input type="text" placeholder="Description (optional)" class="task-desc"/>
+              <input type="text" placeholder="Duration (e.g. 2 hrs)" class="task-duration"/>
+              <select class="task-status">
+                <option value="completed">✅ Completed</option>
+                <option value="in-progress">🔄 In Progress</option>
+                <option value="pending">⏳ Pending</option>
+              </select>
+            </div>
+            <button type="button" class="btn-remove-task" onclick="removeTask(this)">✕</button>
+          </div>
+        </div>
+      </div>
+      <div class="form-section">
+        <label>📌 Tomorrow's Plan</label>
+        <textarea id="report-plan" rows="3" placeholder="What will you work on next?"></textarea>
+      </div>
+      <div id="submit-error" class="error-msg"></div>
+      <div id="submit-success" class="success-msg"></div>
+      <button type="submit" class="btn-primary large" id="submit-report-btn">
+        <span>Submit Report</span>
+        <div class="btn-loader hidden"></div>
+      </button>
+    </form>
+  </div>
+
+  <!-- History Tab -->
+  <div id="tab-history" class="tab-content">
+    <div class="page-header">
+      <h2>My Reports</h2>
+      <p class="sub">Click any report to view details and download as Excel</p>
+    </div>
+    <div id="history-list" class="report-cards full"></div>
+  </div>
+</div>
+
+<!-- ═══ MENTOR DASHBOARD ═══ -->
+<div id="mentor-screen" class="screen">
+  <nav class="navbar mentor-nav">
+    <div class="nav-brand">
+      <div class="brand-icon small mentor">M</div>
+      <span>InternLog <em>Mentor</em></span>
+    </div>
+    <div class="nav-center">
+      <button class="nav-btn active" onclick="showMentorTab('overview',this)">Overview</button>
+      <button class="nav-btn" onclick="showMentorTab('reports',this)">All Reports</button>
+    </div>
+    <div class="nav-right">
+      <span id="mentor-name-nav" class="nav-user"></span>
+      <button class="btn-export mentor-export" onclick="exportExcelMentor()">⬇ Export All</button>
+      <button class="btn-edit-profile" onclick="openEditProfile()">✏️ Profile</button>
+      <button class="btn-logout" onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <div id="tab-overview" class="tab-content active">
+    <div class="page-header">
+      <h2>Mentor Dashboard</h2>
+      <p class="sub">Review and manage intern reports</p>
+    </div>
+    <div class="mentor-stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">👨‍🎓</div>
+        <div class="stat-info">
+          <span id="m-stat-students" class="stat-num">0</span>
+          <span class="stat-label">Total Students</span>
+        </div>
+      </div>
+      <div class="stat-card accent">
+        <div class="stat-icon">📄</div>
+        <div class="stat-info">
+          <span id="m-stat-reports" class="stat-num">0</span>
+          <span class="stat-label">Total Reports</span>
+        </div>
+      </div>
+      <div class="stat-card warm">
+        <div class="stat-icon">🔔</div>
+        <div class="stat-info">
+          <span id="m-stat-pending" class="stat-num">0</span>
+          <span class="stat-label">Pending Review</span>
+        </div>
+      </div>
+    </div>
+    <div class="students-section">
+      <h3>Students</h3>
+      <div id="students-grid" class="students-grid"></div>
+    </div>
+  </div>
+
+  <div id="tab-reports" class="tab-content">
+    <div class="page-header">
+      <h2>All Reports</h2>
+      <div class="filter-row">
+        <select id="filter-student" onchange="filterReports()">
+          <option value="">All Students</option>
+        </select>
+        <select id="filter-status" onchange="filterReports()">
+          <option value="">All Status</option>
+          <option value="pending">Pending Review</option>
+          <option value="reviewed">Reviewed</option>
+        </select>
+      </div>
+    </div>
+    <div id="all-reports-list" class="report-cards full mentor-reports"></div>
+  </div>
+</div>
+
+<!-- ═══ FEEDBACK MODAL ═══ -->
+<div id="feedback-modal" class="modal hidden">
+  <div class="modal-overlay" onclick="closeFeedbackModal()"></div>
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Add Feedback</h3>
+      <button onclick="closeFeedbackModal()" class="modal-close">✕</button>
+    </div>
+    <input type="hidden" id="feedback-report-id"/>
+    <div class="form-group">
+      <label>Your Feedback</label>
+      <textarea id="feedback-text" rows="4" placeholder="Write your feedback for this report..."></textarea>
+    </div>
+    <div class="form-group" style="margin-top:14px;">
+      <label>Rating</label>
+      <div class="star-rating">
+        <span class="star" data-val="1" onclick="setRating(1)">★</span>
+        <span class="star" data-val="2" onclick="setRating(2)">★</span>
+        <span class="star" data-val="3" onclick="setRating(3)">★</span>
+        <span class="star" data-val="4" onclick="setRating(4)">★</span>
+        <span class="star" data-val="5" onclick="setRating(5)">★</span>
+      </div>
+    </div>
+    <div id="feedback-error" class="error-msg"></div>
+    <button class="btn-primary" style="margin-top:16px;" onclick="submitFeedback()">Submit Feedback</button>
+  </div>
+</div>
+
+<!-- ═══ REPORT DETAIL MODAL (with Download button) ═══ -->
+<div id="detail-modal" class="modal hidden">
+  <div class="modal-overlay" onclick="closeDetailModal()"></div>
+  <div class="modal-box wide">
+    <div class="modal-header">
+      <h3 id="detail-title">Report Detail</h3>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <button class="btn-download-report" id="detail-download-btn" onclick="downloadSingleReport()">
+          ⬇ Download Excel
+        </button>
+        <button onclick="closeDetailModal()" class="modal-close">✕</button>
+      </div>
+    </div>
+    <div id="detail-content"></div>
+  </div>
+</div>
+
+<!-- ═══ EDIT PROFILE MODAL ═══ -->
+<div id="edit-profile-modal" class="modal hidden">
+  <div class="modal-overlay" onclick="closeEditProfile()"></div>
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>✏️ Edit Profile</h3>
+      <button onclick="closeEditProfile()" class="modal-close">✕</button>
+    </div>
+    <form onsubmit="saveProfile(event)" style="display:flex;flex-direction:column;gap:16px;">
+      <div class="form-group">
+        <label>Full Name</label>
+        <input type="text" id="edit-name" placeholder="Your name" required/>
+      </div>
+      <div class="form-group">
+        <label>Email Address</label>
+        <input type="email" id="edit-email" placeholder="your@email.com" required/>
+      </div>
+      <div id="edit-student-fields">
+        <div class="form-group">
+          <label>Roll Number</label>
+          <input type="text" id="edit-roll" placeholder="e.g. CS2021001"/>
+        </div>
+        <div class="form-group" style="margin-top:12px;">
+          <label>College / University</label>
+          <input type="text" id="edit-college" placeholder="Your college name"/>
+        </div>
+        <div class="form-group" style="margin-top:12px;">
+          <label>Internship Title</label>
+          <input type="text" id="edit-internship" placeholder="e.g. Full Stack Developer Intern"/>
+        </div>
+      </div>
+      <div id="edit-mentor-fields" class="hidden">
+        <div class="form-group">
+          <label>Organization</label>
+          <input type="text" id="edit-org" placeholder="Company / Institution"/>
+        </div>
+        <div class="form-group" style="margin-top:12px;">
+          <label>Designation</label>
+          <input type="text" id="edit-designation" placeholder="e.g. Senior Engineer"/>
+        </div>
+      </div>
+      <hr style="border-color:var(--border);"/>
+      <p style="font-size:12px;color:var(--text-muted);">Leave password blank to keep current password.</p>
+      <div class="form-group">
+        <label>New Password</label>
+        <input type="password" id="edit-password" placeholder="New password (optional)" minlength="6"/>
+      </div>
+      <div class="form-group">
+        <label>Confirm New Password</label>
+        <input type="password" id="edit-confirm-password" placeholder="Repeat new password"/>
+      </div>
+      <div id="edit-profile-error" class="error-msg"></div>
+      <div id="edit-profile-success" class="success-msg"></div>
+      <button type="submit" class="btn-primary" id="save-profile-btn">
+        <span>Save Changes</span>
+        <div class="btn-loader hidden"></div>
+      </button>
+    </form>
+  </div>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
