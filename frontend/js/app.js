@@ -102,16 +102,17 @@ async function handleRegister(e) {
   setLoading('register-btn', true);
   try {
     const payload = {
-      name: $('reg-name').value,
-      email: $('reg-email').value,
-      password: $('reg-password').value,
-      role: currentRole,
-      rollNumber: $('reg-roll').value,
-      college: $('reg-college').value,
-      internshipTitle: $('reg-internship').value,
-      organization: $('reg-org').value,
-      designation: $('reg-designation').value
-    };
+  name: $('reg-name').value,
+  email: $('reg-email').value,
+  password: $('reg-password').value,
+  role: currentRole,
+  rollNumber: $('reg-roll').value,
+  college: $('reg-college').value,
+  internshipTitle: $('reg-internship').value,
+  organization: $('reg-org').value,
+  designation: $('reg-designation').value,
+  mentorEmail: $('reg-mentor-email').value  // ← add this
+};
     const data = await api('/auth/register', 'POST', payload);
     localStorage.setItem('il_token', data.token);
     localStorage.setItem('il_user', JSON.stringify(data.user));
