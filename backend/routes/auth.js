@@ -26,30 +26,25 @@ router.post('/register', async (req, res) => {
 });
 
 // Login
-const mongoose = require("mongoose");
-const User = require("../models/User");
-
-router.post("/login", async (req, res) => {
+// Login
+router.post('/login', async (req, res) => {
   try {
-    console.log("Login route hit");
-    console.log("DB ready state:", mongoose.connection.readyState);
-
     const { email, password } = req.body;
-
     const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
 
-    if (!user) {
-      return res.status(404).json({ message: "User not found" });
-    }
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) return res.status(400).json({ message: 'Invalid credentials' });
 
-    // continue password check here
-    res.status(200).json({ message: "Login successful", user });
-
-  } catch (error) {
-    console.error("Login error:", error);
-    res.status(500).json({ message: "Server error", error: error.message });
+    res.json({
+      token: generateToken(user._id),
+      user: { id: user._id, name: user.name, email: user.email, role: user.role }
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
+
 // Get current user
 router.get('/me', protect, async (req, res) => {
   res.json(req.user);
