@@ -2,7 +2,7 @@
    InternLog — Frontend JS
    ═══════════════════════════════════════════ */
 
-const API = 'https://internship-tracker-v2.onrender.com/api';
+const API = 'https://internship-tracker-v2-backend.onrender.com/api';
 let currentRole = 'student';
 let currentRating = 0;
 let allReports = [];
